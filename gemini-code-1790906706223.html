@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Pemesanan PO BUTES Madura</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'brand-red': '#dc2626',
+            'brand-darkred': '#991b1b',
+            'brand-deepred': '#7f1d1d',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-stone-100 text-stone-800 font-sans min-h-screen pb-12">
+
+  <!-- NAVBAR / HEADER -->
+  <header class="bg-brand-darkred text-white sticky top-0 z-30 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between">
+      
+      <!-- SISI KIRI: LOGO PRODUK, JUDUL & SWITCHER MODE -->
+      <div class="flex items-center gap-3">
+        <!-- LOGO PRODUK BUTES MADURA -->
+        <div class="w-12 h-12 md:w-14 md:h-14 bg-[#fdf8ee] rounded-full p-1 border-2 border-amber-400 shadow-lg shrink-0 overflow-hidden flex items-center justify-center">
+          <img id="mainLogoHeader" src="logo.png" alt="Logo BUTES Madura" class="w-full h-full object-contain rounded-full" 
+               onerror="tryFallbackLogos(this);">
+        </div>
+
+        <div>
+          <h1 class="font-black text-base md:text-xl leading-none tracking-tight">BUTES <span class="text-amber-400">Madura</span></h1>
+          <p class="text-[9px] md:text-[11px] text-red-200 mt-0.5">Kerupuk Tette & Petis Olahan Khas Pamekasan</p>
+        </div>
+
+        <!-- Mode Switcher (Pembeli / Admin) -->
+        <div class="bg-brand-deepred/80 p-1 rounded-xl border border-red-700/60 flex items-center gap-1 text-xs font-bold ml-1 md:ml-2">
+          <button id="btnNavBuyer" onclick="switchView('buyer')" class="px-2.5 md:px-3 py-1.5 rounded-lg transition-all duration-200 bg-red-600 text-white shadow-sm text-xs">
+            <i class="fa-solid fa-store mr-1"></i> <span class="hidden sm:inline">Toko</span> Pembeli
+          </button>
+          <button id="btnNavSeller" onclick="requestAdminAccess()" class="px-2.5 md:px-3 py-1.5 rounded-lg transition-all duration-200 text-red-200 hover:text-white text-xs">
+            <i class="fa-solid fa-user-shield mr-1"></i> Admin <span class="hidden sm:inline">Penjual</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- SISI KANAN ATAS: TOMBOL KERANJANG -->
+      <div class="flex items-center gap-2 md:gap-3">
+        <button id="cartHeaderBtn" onclick="toggleCartDrawer()" class="relative bg-amber-500 hover:bg-amber-400 text-stone-900 p-2.5 md:p-3 rounded-xl transition shadow-md flex items-center justify-center">
+          <i class="fa-solid fa-cart-shopping text-lg md:text-xl"></i>
+          <span id="cartCountBadge" class="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 bg-red-600 text-white text-[10px] md:text-xs font-black rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center border-2 border-white shadow-lg">0</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-6xl mx-auto px-4 pt-6">
+
+    <!-- ================= VIEW 1: PEMBELI ================= -->
+    <div id="buyerSection" class="space-y-8">
+      <!-- HERO BANNER PROMO BUTES MADURA -->
+      <div class="relative bg-gradient-to-br from-red-700 via-brand-red to-red-800 rounded-3xl p-6 md:p-10 text-white shadow-2xl overflow-hidden border border-red-500">
+        <div class="absolute -right-10 -bottom-10 opacity-15 pointer-events-none">
+          <i class="fa-solid fa-pepper-hot text-[280px]"></i>
+        </div>
+        <div class="relative z-10 max-w-2xl space-y-4">
+          <div class="inline-flex items-center gap-2 bg-amber-400/20 text-amber-300 border border-amber-400/40 px-3 py-1 rounded-full text-xs font-bold backdrop-blur-sm">
+            <i class="fa-solid fa-award"></i> Kuliner Khas Pamekasan, Madura
+          </div>
+          <h1 class="text-3xl md:text-5xl font-black leading-tight tracking-tight">
+            Kerupuk Tette & Petis Madura <span class="text-amber-300 underline decoration-wavy decoration-amber-400/60">BUTES</span>
+          </h1>
+          <p class="text-red-100 text-sm md:text-base leading-relaxed">
+            Rasakan sensasi renyahnya Kerupuk Tette singkong khas Madura dicocol dengan Petis Madura gurih autentik. Dibuat dengan resep asli Pamekasan!
+          </p>
+          <div class="pt-2 flex flex-wrap items-center gap-4">
+            <div class="bg-white/10 backdrop-blur-md p-3 px-5 rounded-2xl border border-white/20 shadow-inner">
+              <span class="text-xs text-red-200 block font-medium">Harga Spesial PO:</span>
+              <span class="text-3xl font-black text-amber-300">Rp 13.500 <span class="text-xs font-normal text-white">/ paket</span></span>
+            </div>
+            <button onclick="scrollToCatalog()" class="bg-amber-400 hover:bg-amber-300 text-red-950 font-black px-6 py-3.5 rounded-2xl shadow-xl hover:shadow-2xl transition transform hover:-translate-y-0.5 flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-basket-shopping"></i> Pesan PO Sekarang
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HIGHLIGHTS / FITUR UNGGULAN -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-2xl border border-red-100 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl font-bold shrink-0">
+            <i class="fa-solid fa-utensils"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm text-stone-900">100% Asli Madura</h4>
+            <p class="text-xs text-stone-500">Bahan olahan pilihan Pamekasan</p>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-red-100 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-xl font-bold shrink-0">
+            <i class="fa-solid fa-box-open"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm text-stone-900">Sistem Paket Hemat</h4>
+            <p class="text-xs text-stone-500">Kerupuk Tette + Petis Olahan</p>
+          </div>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-red-100 shadow-sm flex items-center gap-4">
+          <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center text-xl font-bold shrink-0">
+            <i class="fa-brands fa-whatsapp"></i>
+          </div>
+          <div>
+            <h4 class="font-bold text-sm text-stone-900">Pesan Langsung ke WA</h4>
+            <p class="text-xs text-stone-500">Order praktis dan masuk admin</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- CATALOG SECTION -->
+      <section id="catalogSection" class="space-y-6">
+        <div class="flex items-center justify-between border-b border-stone-200 pb-3 flex-wrap gap-2">
+          <div>
+            <h2 class="text-2xl font-black text-stone-900">Katalog Produk Pre-Order</h2>
+            <p class="text-xs text-stone-500">Pilih paket BUTES kesukaanmu dan order sekarang</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="resetProductData()" class="bg-amber-100 hover:bg-amber-200 text-amber-800 font-bold text-xs px-3 py-1.5 rounded-xl border border-amber-300 transition flex items-center gap-1">
+              <i class="fa-solid fa-arrows-rotate"></i> Reset Gambar Produk
+            </button>
+            <span class="bg-red-100 text-red-700 font-bold text-xs px-3 py-1.5 rounded-full border border-red-200">
+              Sistem PO Buka
+            </span>
+          </div>
+        </div>
+        <div id="productGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Rendered via JavaScript -->
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= VIEW 2: ADMIN / PENJUAL ================= -->
+    <div id="sellerSection" class="hidden space-y-8">
+      <div class="bg-white rounded-3xl p-6 border border-stone-200 shadow-xl space-y-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-stone-100 pb-4">
+          <div>
+            <h2 class="text-2xl font-black text-stone-900 flex items-center gap-2">
+              <i class="fa-solid fa-chart-line text-red-600"></i> Dashboard Rekap PO Penjual
+            </h2>
+            <p class="text-xs text-stone-500">Kelola pesanan masuk dari pembeli dan kontrol stok produk BUTES</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="renderSellerDashboard()" class="bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold text-xs px-4 py-2 rounded-xl border border-stone-300 transition flex items-center gap-1.5">
+              <i class="fa-solid fa-rotate"></i> Refresh
+            </button>
+            <button onclick="clearAllOrders()" class="bg-red-50 hover:bg-red-100 text-red-600 font-bold text-xs px-3 py-2 rounded-xl border border-red-200 transition">
+              <i class="fa-solid fa-trash-can"></i> Hapus Semua
+            </button>
+            <button onclick="logoutAdmin()" class="bg-brand-darkred hover:bg-red-900 text-white font-bold text-xs px-4 py-2 rounded-xl shadow transition flex items-center gap-1.5">
+              <i class="fa-solid fa-right-from-bracket"></i> Logout Admin
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-gradient-to-br from-red-500 to-red-600 text-white p-4 rounded-2xl shadow-md space-y-1">
+            <div class="text-xs font-semibold text-red-100">Total Pesanan PO</div>
+            <div id="statTotalOrders" class="text-3xl font-black">0</div>
+          </div>
+          <div class="bg-stone-900 text-white p-4 rounded-2xl shadow-md space-y-1">
+            <div class="text-xs font-semibold text-stone-400">Total Pendapatan PO</div>
+            <div id="statTotalRevenue" class="text-2xl md:text-3xl font-black text-amber-400">Rp 0</div>
+          </div>
+          <div class="bg-amber-500 text-stone-950 p-4 rounded-2xl shadow-md space-y-1">
+            <div class="text-xs font-semibold text-amber-950">Menunggu Dikirim</div>
+            <div id="statPendingOrders" class="text-3xl font-black">0</div>
+          </div>
+          <div class="bg-emerald-600 text-white p-4 rounded-2xl shadow-md space-y-1">
+            <div class="text-xs font-semibold text-emerald-100">Selesai Dikirim</div>
+            <div id="statCompletedOrders" class="text-3xl font-black">0</div>
+          </div>
+        </div>
+
+        <div class="space-y-3">
+          <h3 class="font-bold text-lg text-stone-800 flex items-center gap-2">
+            <i class="fa-solid fa-receipt text-red-600"></i> Daftar Pesanan PO Pembeli Masuk
+          </h3>
+          <div class="overflow-x-auto rounded-2xl border border-stone-200 shadow-inner">
+            <table class="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr class="bg-stone-100 text-stone-700 font-bold uppercase border-b border-stone-200">
+                  <th class="p-3">ID / Tanggal</th>
+                  <th class="p-3">Nama & Kontak</th>
+                  <th class="p-3">Lokasi / Alamat</th>
+                  <th class="p-3">Rincian Paket PO</th>
+                  <th class="p-3">Total Harga</th>
+                  <th class="p-3">Status PO</th>
+                  <th class="p-3 text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="sellerOrdersTableBody" class="divide-y divide-stone-200 bg-white">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="pt-6 border-t border-stone-200 space-y-4">
+          <h3 class="font-bold text-lg text-stone-800 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-red-600"></i> Kelola Produk, Stok & Harga PO
+          </h3>
+          <div id="sellerProductSettingsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL LOGIN ADMIN -->
+  <div id="adminLoginModal" class="fixed inset-0 bg-stone-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-4 border border-stone-200">
+      <div class="text-center space-y-1">
+        <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center text-xl mx-auto mb-2">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
+        <h3 class="font-black text-xl text-stone-900">Akses Dashboard Admin</h3>
+        <p class="text-xs text-stone-500">Masukkan password admin untuk masuk ke rekap pesanan</p>
+      </div>
+      <form onsubmit="handleAdminLogin(event)" class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Password Admin</label>
+          <input type="password" id="adminPasswordInput" required placeholder="Masukkan password admin" class="w-full border border-stone-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-red-500 focus:outline-none">
+          <p id="loginErrorMsg" class="text-[10px] text-red-600 font-bold mt-1 hidden"><i class="fa-solid fa-triangle-exclamation"></i> Password salah! Silakan coba lagi.</p>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button type="button" onclick="closeAdminLoginModal()" class="flex-1 bg-stone-100 hover:bg-stone-200 text-stone-700 font-bold py-2.5 rounded-xl text-xs transition">Batal</button>
+          <button type="submit" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-xs transition shadow">Masuk</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- DRAWER KERANJANG PESANAN PO -->
+  <div id="cartDrawer" class="fixed inset-0 z-50 hidden">
+    <div onclick="toggleCartDrawer()" class="absolute inset-0 bg-stone-900/60 backdrop-blur-xs"></div>
+    
+    <div class="absolute right-0 top-0 bottom-0 w-full max-w-md md:max-w-lg bg-white shadow-2xl flex flex-col z-10">
+      <div class="bg-brand-darkred text-white p-4 md:p-5 flex items-center justify-between border-b border-red-900 shadow-md shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-amber-400 text-stone-900 rounded-2xl flex items-center justify-center font-black text-xl shadow">
+            <i class="fa-solid fa-basket-shopping"></i>
+          </div>
+          <div>
+            <h3 class="font-black text-lg leading-tight">Keranjang Pesanan PO</h3>
+            <p class="text-xs text-red-200">Periksa, Edit Item & Isi Form Pemesanan</p>
+          </div>
+        </div>
+        <button onclick="toggleCartDrawer()" class="bg-red-800/80 hover:bg-red-700 text-white w-9 h-9 rounded-xl flex items-center justify-center text-lg transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-stone-50">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between border-b border-stone-200 pb-2">
+            <h4 class="text-xs font-black text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-list-check text-red-600"></i> 1. Rincian Produk PO
+            </h4>
+            <span class="text-[11px] text-stone-400 font-bold">Edit / Tambah Kuantitas</span>
+          </div>
+
+          <div id="cartItemsContainer" class="space-y-3">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <div class="bg-gradient-to-r from-red-50 to-amber-50 p-4 rounded-2xl border-2 border-red-200 shadow-sm flex justify-between items-center">
+          <div>
+            <span class="text-xs text-stone-500 font-bold uppercase tracking-wider block">Total Pembayaran PO</span>
+            <span class="text-[11px] text-stone-400">Termasuk semua pesanan</span>
+          </div>
+          <span id="cartDrawerTotal" class="text-2xl md:text-3xl font-black text-red-600">Rp 0</span>
+        </div>
+
+        <form id="orderPOForm" onsubmit="handlePOCheckout(event)" class="space-y-4 pt-2 border-t border-stone-200">
+          <div class="text-xs font-black text-stone-800 uppercase tracking-wider flex items-center gap-1.5">
+            <i class="fa-solid fa-id-card text-red-600 text-sm"></i> 2. Form Data Pemesan
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Nama Lengkap <span class="text-red-600">*</span></label>
+            <input type="text" id="inputName" required placeholder="Contoh: Fitrotun Nisa" class="w-full bg-white border border-stone-300 rounded-xl p-3 text-xs focus:ring-2 focus:ring-red-500 focus:outline-none shadow-xs">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Lokasi Detail / Alamat <span class="text-red-600">*</span></label>
+            <textarea id="inputLocation" required rows="2" placeholder="Contoh: Jl. Trunojoyo No. 12, Pamekasan (Depan toko jamu)" class="w-full bg-white border border-stone-300 rounded-xl p-3 text-xs focus:ring-2 focus:ring-red-500 focus:outline-none shadow-xs"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Share Location / Link Google Maps <span class="text-stone-400 font-normal">(Opsional)</span></label>
+            <input type="url" id="inputMapsLink" placeholder="https://maps.app.goo.gl/..." class="w-full bg-white border border-stone-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-red-500 focus:outline-none shadow-xs">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Nomor WhatsApp <span class="text-red-600">*</span></label>
+            <input type="tel" id="inputWA" required placeholder="Contoh: 081234567890" class="w-full bg-white border border-stone-300 rounded-xl p-3 text-xs focus:ring-2 focus:ring-red-500 focus:outline-none shadow-xs">
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-700 mb-1">Catatan Tambahan <span class="text-stone-400 font-normal">(Opsional)</span></label>
+            <input type="text" id="inputNotes" placeholder="Contoh: Petisnya dibuat agak pedas ya" class="w-full bg-white border border-stone-300 rounded-xl p-2.5 text-xs focus:ring-2 focus:ring-red-500 focus:outline-none shadow-xs">
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" id="btnSubmitPO" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 px-4 rounded-2xl shadow-xl transition flex items-center justify-center gap-2 text-base disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="fa-brands fa-whatsapp text-2xl"></i> Pesan & Masuk ke WA
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // NOMOR WA ADMIN BUTES TERUPDATE
+    const ADMIN_WA_NUMBER = "628992190876"; 
+
+    // FALLBACK BILA NAMA FILE LOGO BERBEDA
+    let logoTryIndex = 0;
+    const logoCandidates = ['logo.png', 'logo.jpg', 'logo.jpeg', 'logo.PNG', 'logo.JPG'];
+
+    function tryFallbackLogos(imgEl) {
+      if (logoTryIndex < logoCandidates.length) {
+        imgEl.src = logoCandidates[logoTryIndex];
+        logoTryIndex++;
+      } else {
+        imgEl.onerror = null;
+        imgEl.src = 'https://placehold.co/100x100/991b1b/ffffff?text=BUTES';
+      }
+    }
+
+    // GAMBAR PRODUK KATALOG
+    const defaultProducts = [
+      { 
+        id: 'p1', 
+        name: 'Paket Kombo BUTES Mantap', 
+        desc: '1 Bungkus Kerupuk Tette Singkong + 1 Pot Petis Olahan Khas Pamekasan', 
+        price: 13500, 
+        stock: 50, 
+        image: 'WhatsApp Image 2026-10-01 at 19.43.19.jpeg'
+      },
+      { 
+        id: 'p2', 
+        name: 'Kerupuk Tette Singkong (Mentah/Matang)', 
+        desc: 'Kerupuk tette khas Pamekasan isi 25 lembar renyah dan gurih', 
+        price: 10000, 
+        stock: 40, 
+        image: 'WhatsApp Image 2026-10-01 at 19.38.41.jpeg'
+      },
+      { 
+        id: 'p3', 
+        name: 'Petis Olahan Madura Spesial', 
+        desc: 'Petis olahan siap cocol rasa asin gurih khas Pamekasan 200gr', 
+        price: 5000, 
+        stock: 30, 
+        image: 'WhatsApp Image 2026-10-01 at 19.38.40.jpeg'
+      }
+    ];
+
+    let products = JSON.parse(localStorage.getItem('butes_products')) || defaultProducts;
+
+    let cart = [];
+    let orders = JSON.parse(localStorage.getItem('butes_orders')) || [];
+    let isAdminLoggedIn = false;
+
+    function formatRp(amount) {
+      return 'Rp ' + amount.toLocaleString('id-ID');
+    }
+
+    window.onload = function() {
+      if (!localStorage.getItem('butes_img_v4')) {
+        products = defaultProducts;
+        localStorage.setItem('butes_products', JSON.stringify(defaultProducts));
+        localStorage.setItem('butes_img_v4', 'true');
+      }
+      renderCatalog();
+      updateCartBadge();
+    };
+
+    function resetProductData() {
+      products = defaultProducts;
+      localStorage.setItem('butes_products', JSON.stringify(defaultProducts));
+      renderCatalog();
+      alert("Nama file gambar produk telah diperbarui!");
+    }
+
+    function switchView(view) {
+      const buyerSec = document.getElementById('buyerSection');
+      const sellerSec = document.getElementById('sellerSection');
+      const btnNavBuyer = document.getElementById('btnNavBuyer');
+      const btnNavSeller = document.getElementById('btnNavSeller');
+
+      if (view === 'buyer') {
+        buyerSec.classList.remove('hidden');
+        sellerSec.classList.add('hidden');
+        btnNavBuyer.className = "px-2.5 md:px-3 py-1.5 rounded-lg transition-all duration-200 bg-red-600 text-white shadow-sm text-xs";
+        btnNavSeller.className = "px-2.5 md:px-3 py-1.5 rounded-lg transition-all duration-200 text-red-200 hover:text-white text-xs";
+      } else {
+        buyerSec.classList.add('hidden');
+        sellerSec.classList.remove('hidden');
+        btnNavSeller.className = "px-2.5 md:px-3 py-1.5 rounded-lg transition-all duration-200 bg-red-600 text-white shadow-sm text-xs";
+        btnNavBuyer.className = "px-2.5 md:px-3 py-1.5 rounded-lg transition-all duration-200 text-red-200 hover:text-white text-xs";
+        renderSellerDashboard();
+      }
+    }
+
+    function scrollToCatalog() {
+      document.getElementById('catalogSection').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function renderCatalog() {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = products.map(p => `
+        <div class="bg-white rounded-3xl overflow-hidden border border-stone-200 shadow-md flex flex-col justify-between hover:shadow-xl transition group">
+          <div>
+            <div class="w-full h-48 md:h-52 bg-stone-100 overflow-hidden relative">
+              <img src="${p.image}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.onerror=null; this.src='https://placehold.co/400x300/f5f5f4/dc2626?text=Foto+Produk+BUTES';">
+              <span class="absolute top-3 right-3 bg-red-600 text-white text-[10px] font-black px-2.5 py-1 rounded-full shadow">PO BUKA</span>
+            </div>
+            
+            <div class="p-5 space-y-2">
+              <h3 class="font-bold text-base text-stone-900 leading-snug">${p.name}</h3>
+              <p class="text-xs text-stone-500 leading-relaxed">${p.desc}</p>
+            </div>
+          </div>
+
+          <div class="p-5 pt-0 mt-2 border-t border-stone-100 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-stone-400 block uppercase font-bold">Harga PO</span>
+              <span class="text-lg font-black text-red-600">${formatRp(p.price)}</span>
+            </div>
+            <button onclick="addToCart('${p.id}')" ${p.stock <= 0 ? 'disabled' : ''} class="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5">
+              ${p.stock > 0 ? '<i class="fa-solid fa-cart-plus"></i> Tambah' : 'Stok Habis'}
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleCartDrawer() {
+      const drawer = document.getElementById('cartDrawer');
+      drawer.classList.toggle('hidden');
+      renderCart();
+    }
+
+    function addToCart(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      const item = cart.find(c => c.id === productId);
+      if (item) {
+        if (item.qty < product.stock) item.qty++;
+      } else {
+        cart.push({ ...product, qty: 1 });
+      }
+      updateCartBadge();
+      toggleCartDrawer();
+    }
+
+    function updateQty(productId, delta) {
+      const item = cart.find(c => c.id === productId);
+      if (!item) return;
+
+      const product = products.find(p => p.id === productId);
+      item.qty += delta;
+
+      if (item.qty <= 0) {
+        cart = cart.filter(c => c.id !== productId);
+      } else if (product && item.qty > product.stock) {
+        item.qty = product.stock;
+      }
+
+      updateCartBadge();
+      renderCart();
+    }
+
+    function removeItemCompletely(productId) {
+      cart = cart.filter(c => c.id !== productId);
+      updateCartBadge();
+      renderCart();
+    }
+
+    function updateCartBadge() {
+      const totalCount = cart.reduce((sum, item) => sum + item.qty, 0);
+      document.getElementById('cartCountBadge').innerText = totalCount;
+    }
+
+    function renderCart() {
+      const container = document.getElementById('cartItemsContainer');
+      const totalEl = document.getElementById('cartDrawerTotal');
+      const btnSubmit = document.getElementById('btnSubmitPO');
+
+      if (cart.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 space-y-2 bg-white p-6 rounded-2xl border border-stone-200">
+            <i class="fa-solid fa-basket-shopping text-3xl text-stone-300"></i>
+            <h4 class="font-bold text-stone-700 text-xs">Keranjang PO Kosong</h4>
+            <p class="text-[11px] text-stone-400">Silakan pilih produk dari katalog untuk memesan.</p>
+          </div>
+        `;
+        totalEl.innerText = formatRp(0);
+        btnSubmit.disabled = true;
+        return;
+      }
+
+      btnSubmit.disabled = false;
+      let total = 0;
+
+      container.innerHTML = cart.map(item => {
+        const itemSubtotal = item.price * item.qty;
+        total += itemSubtotal;
+        return `
+          <div class="bg-white p-3.5 rounded-2xl border-2 border-stone-200 shadow-sm flex gap-3 items-center">
+            <img src="${item.image}" alt="${item.name}" class="w-16 h-16 object-cover rounded-xl border border-stone-200 shrink-0" onerror="this.onerror=null; this.src='https://placehold.co/100x100/f5f5f4/dc2626?text=BUTES';">
+            
+            <div class="flex-1 space-y-1">
+              <div class="flex items-start justify-between gap-1">
+                <h4 class="font-black text-xs text-stone-900 leading-tight">${item.name}</h4>
+                <button type="button" onclick="removeItemCompletely('${item.id}')" class="text-red-500 hover:text-red-700 text-xs p-1 transition">
+                  <i class="fa-solid fa-trash-can"></i>
+                </button>
+              </div>
+
+              <p class="text-[11px] text-stone-500">${formatRp(item.price)} / paket</p>
+
+              <div class="flex items-center justify-between pt-1">
+                <div class="flex items-center bg-stone-100 border border-stone-300 rounded-lg p-0.5 gap-1">
+                  <button type="button" onclick="updateQty('${item.id}', -1)" class="w-6 h-6 ${item.qty === 1 ? 'bg-red-600 text-white' : 'bg-white text-stone-800'} hover:opacity-80 rounded-md font-black text-xs flex items-center justify-center shadow-xs transition">
+                    ${item.qty === 1 ? '<i class="fa-solid fa-trash-can text-[10px]"></i>' : '-'}
+                  </button>
+                  <span class="text-xs font-black px-2 text-stone-900 min-w-[24px] text-center">${item.qty}</span>
+                  <button type="button" onclick="updateQty('${item.id}', 1)" class="w-6 h-6 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md font-black text-xs flex items-center justify-center shadow-xs transition">
+                    +
+                  </button>
+                </div>
+
+                <span class="text-xs font-black text-red-600">${formatRp(itemSubtotal)}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      totalEl.innerText = formatRp(total);
+    }
+
+    function handlePOCheckout(e) {
+      e.preventDefault();
+      if (cart.length === 0) return;
+
+      const name = document.getElementById('inputName').value;
+      const location = document.getElementById('inputLocation').value;
+      const mapsLink = document.getElementById('inputMapsLink').value;
+      const wa = document.getElementById('inputWA').value;
+      const notes = document.getElementById('inputNotes').value;
+
+      const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+      const orderId = 'PO-' + Math.floor(1000 + Math.random() * 9000);
+      const dateStr = new Date().toLocaleString('id-ID');
+
+      const newOrder = {
+        id: orderId,
+        date: dateStr,
+        name,
+        location,
+        mapsLink,
+        wa,
+        notes,
+        items: [...cart],
+        total,
+        status: 'Menunggu Dikirim'
+      };
+
+      orders.unshift(newOrder);
+      localStorage.setItem('butes_orders', JSON.stringify(orders));
+
+      cart.forEach(cItem => {
+        const p = products.find(prod => prod.id === cItem.id);
+        if (p) p.stock = Math.max(0, p.stock - cItem.qty);
+      });
+      localStorage.setItem('butes_products', JSON.stringify(products));
+
+      let itemsText = cart.map(i => `- ${i.name} x${i.qty} = ${formatRp(i.price * i.qty)}`).join('\n');
+      let waMessage = `Halo Admin BUTES Madura! Saya mau pesan PO Kerupuk Tette & Petis:\n\n` +
+        `*ID Pesanan:* ${orderId}\n` +
+        `*Nama:* ${name}\n` +
+        `*Alamat:* ${location}\n` +
+        (mapsLink ? `*Maps:* ${mapsLink}\n` : '') +
+        `*No. WA:* ${wa}\n` +
+        (notes ? `*Catatan:* ${notes}\n` : '') +
+        `\n*Rincian Pesanan:*\n${itemsText}\n\n` +
+        `*Total Pembayaran:* ${formatRp(total)}\n\nMohon diproses ya kak! Terima kasih.`;
+
+      const encodedMsg = encodeURIComponent(waMessage);
+      window.open(`https://wa.me/${ADMIN_WA_NUMBER}?text=${encodedMsg}`, '_blank');
+
+      cart = [];
+      updateCartBadge();
+      document.getElementById('orderPOForm').reset();
+      toggleCartDrawer();
+      renderCatalog();
+      alert('Pesanan PO berhasil dibuat dan diteruskan ke WhatsApp Admin!');
+    }
+
+    function requestAdminAccess() {
+      if (isAdminLoggedIn) {
+        switchView('seller');
+      } else {
+        document.getElementById('adminLoginModal').classList.remove('hidden');
+      }
+    }
+
+    function closeAdminLoginModal() {
+      document.getElementById('adminLoginModal').classList.add('hidden');
+      document.getElementById('loginErrorMsg').classList.add('hidden');
+      document.getElementById('adminPasswordInput').value = '';
+    }
+
+    function handleAdminLogin(e) {
+      e.preventDefault();
+      const pwd = document.getElementById('adminPasswordInput').value;
+      if (pwd === 'butes123') {
+        isAdminLoggedIn = true;
+        closeAdminLoginModal();
+        switchView('seller');
+      } else {
+        document.getElementById('loginErrorMsg').classList.remove('hidden');
+      }
+    }
+
+    function logoutAdmin() {
+      isAdminLoggedIn = false;
+      switchView('buyer');
+    }
+
+    function renderSellerDashboard() {
+      const totalOrders = orders.length;
+      const totalRev = orders.reduce((sum, o) => sum + o.total, 0);
+      const pendingOrders = orders.filter(o => o.status === 'Menunggu Dikirim').length;
+      const completedOrders = orders.filter(o => o.status === 'Selesai').length;
+
+      document.getElementById('statTotalOrders').innerText = totalOrders;
+      document.getElementById('statTotalRevenue').innerText = formatRp(totalRev);
+      document.getElementById('statPendingOrders').innerText = pendingOrders;
+      document.getElementById('statCompletedOrders').innerText = completedOrders;
+
+      const tableBody = document.getElementById('sellerOrdersTableBody');
+      if (orders.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="p-8 text-center text-stone-400">Belum ada pesanan PO yang masuk.</td>
+          </tr>
+        `;
+      } else {
+        tableBody.innerHTML = orders.map(o => `
+          <tr class="hover:bg-stone-50">
+            <td class="p-3">
+              <span class="font-bold text-stone-900 block">${o.id}</span>
+              <span class="text-[10px] text-stone-400">${o.date}</span>
+            </td>
+            <td class="p-3">
+              <span class="font-bold block text-stone-800">${o.name}</span>
+              <a href="https://wa.me/${o.wa.replace(/[^0-9]/g, '')}" target="_blank" class="text-emerald-600 hover:underline font-semibold text-[11px]">
+                <i class="fa-brands fa-whatsapp"></i> ${o.wa}
+              </a>
+            </td>
+            <td class="p-3 max-w-xs">
+              <p class="truncate text-stone-600">${o.location}</p>
+              ${o.mapsLink ? `<a href="${o.mapsLink}" target="_blank" class="text-blue-600 hover:underline text-[10px]"><i class="fa-solid fa-location-dot"></i> Buka Maps</a>` : ''}
+            </td>
+            <td class="p-3">
+              <ul class="list-disc list-inside text-[11px] text-stone-600">
+                ${o.items.map(i => `<li>${i.name} (${i.qty}x)</li>`).join('')}
+              </ul>
+              ${o.notes ? `<p class="text-[10px] text-amber-600 italic mt-0.5">Catatan: "${o.notes}"</p>` : ''}
+            </td>
+            <td class="p-3 font-bold text-red-600">${formatRp(o.total)}</td>
+            <td class="p-3">
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${o.status === 'Selesai' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
+                ${o.status}
+              </span>
+            </td>
+            <td class="p-3 text-center">
+              <button onclick="toggleOrderStatus('${o.id}')" class="bg-stone-100 hover:bg-stone-200 text-stone-700 p-1.5 rounded-lg text-xs font-bold transition">
+                Ubah Status
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+      const settingsList = document.getElementById('sellerProductSettingsList');
+      settingsList.innerHTML = products.map(p => `
+        <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="font-bold text-sm text-stone-900">${p.name}</h4>
+            <span class="text-xs text-stone-400">ID: ${p.id}</span>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block text-[10px] font-bold text-stone-500">Harga (Rp)</label>
+              <input type="number" id="setting-price-${p.id}" value="${p.price}" class="w-full bg-white border border-stone-300 rounded-lg p-1.5 text-xs">
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-stone-500">Stok PO</label>
+              <input type="number" id="setting-stock-${p.id}" value="${p.stock}" class="w-full bg-white border border-stone-300 rounded-lg p-1.5 text-xs">
+            </div>
+          </div>
+          <button onclick="updateProductSetting('${p.id}')" class="w-full bg-stone-800 hover:bg-stone-900 text-white font-bold py-1.5 rounded-lg text-xs transition">
+            Simpan Perubahan
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function toggleOrderStatus(orderId) {
+      const order = orders.find(o => o.id === orderId);
+      if (!order) return;
+      order.status = order.status === 'Selesai' ? 'Menunggu Dikirim' : 'Selesai';
+      localStorage.setItem('butes_orders', JSON.stringify(orders));
+      renderSellerDashboard();
+    }
+
+    function updateProductSetting(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      const newPrice = parseInt(document.getElementById(`setting-price-${productId}`).value);
+      const newStock = parseInt(document.getElementById(`setting-stock-${productId}`).value);
+
+      if (!isNaN(newPrice)) product.price = newPrice;
+      if (!isNaN(newStock)) product.stock = newStock;
+
+      localStorage.setItem('butes_products', JSON.stringify(products));
+      renderCatalog();
+      renderSellerDashboard();
+      alert(`Produk ${product.name} berhasil diperbarui!`);
+    }
+
+    function clearAllOrders() {
+      if (confirm('Apakah Anda yakin ingin menghapus semua daftar pesanan masuk?')) {
+        orders = [];
+        localStorage.setItem('butes_orders', JSON.stringify(orders));
+        renderSellerDashboard();
+      }
+    }
+  </script>
+</body>
+</html>
